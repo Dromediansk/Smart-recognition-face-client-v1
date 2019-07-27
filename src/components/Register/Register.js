@@ -28,9 +28,12 @@ class Register extends React.Component {
 	onSubmitRegister = () => {
 		const { name, email, password } = this.state;
 		let validEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)
-		if (!name || !email || !validEmail) {
-			return toast.error('Wrong credentials!', toastOptions);
-		} else if (password.length < 6) {
+		if (!name) {
+			return toast.error('Wrong format of name!', toastOptions);
+		} else if (!email || !validEmail) {
+			return toast.error('Wrong format of email!', toastOptions);
+		}
+		else if (password.length < 6) {
 			return toast.error('Password must have at least 6 characters!', toastOptions);
 		} else {
 			this.registerUser();
@@ -49,7 +52,12 @@ class Register extends React.Component {
 				name: this.state.name
 			})
 		})
-			.then(response => response.json())
+			.then(response => {
+				if (response.status === 400) {
+					return toast.error('Unable to register!', toastOptions);
+				}
+				return response.json()
+			})
 			.then(user => {
 				if (user.id) {
 					this.props.loadUser(user)
