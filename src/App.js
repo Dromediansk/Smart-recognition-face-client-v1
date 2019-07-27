@@ -11,6 +11,7 @@ import './App.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import toastOptions from './utils/utils';
+import Spinner from './utils/Spinner/Spinner';
 
 const particlesOptions = {
   particles: {
@@ -30,6 +31,7 @@ const initialState = {
   boxes: [],
   route: 'signin',
   isSignedIn: false,
+  isLoading: false,
   user: {
     id: '',
     name: '',
@@ -85,7 +87,7 @@ class App extends Component {
     if (!regexUrl) {
       return toast.error('Url must start with https://.. !', toastOptions);
     } else {
-      this.setState({ imageUrl: this.state.input });
+      this.setState({ imageUrl: this.state.input, isLoading: true });
       this.detectImage();
     }
   }
@@ -124,6 +126,7 @@ class App extends Component {
             .catch(console.log)
         }
         this.displayFaceBoxes(this.calculateFaceLocations(response))
+        this.setState({ isLoading: false })
       })
       .catch(err => console.log(err));
   }
@@ -139,6 +142,7 @@ class App extends Component {
         {route === 'home' ?
           <div>
             <ToastContainer />
+            {this.state.isLoading ? <Spinner /> : null}
             <Logo />
             <Rank name={this.state.user.name} entries={this.state.user.entries} />
             <ImageLinkForm

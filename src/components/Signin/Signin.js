@@ -2,14 +2,13 @@ import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import toastOptions from '../../utils/utils';
+import Spinner from '../../utils/Spinner/Spinner';
 
 class Signin extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			signInEmail: '',
-			signInPassword: ''
-		}
+	state = {
+		signInEmail: '',
+		signInPassword: '',
+		isLoading: false
 	}
 
 	onEmailChange = (event) => {
@@ -33,6 +32,7 @@ class Signin extends React.Component {
 	}
 
 	signInUser = () => {
+		this.setState({ isLoading: true })
 		fetch('https://guarded-reaches-10517.herokuapp.com/signin', {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
@@ -53,6 +53,7 @@ class Signin extends React.Component {
 				if (user.id) {
 					this.props.loadUser(user)
 					this.props.onRouteChange('home');
+					this.setState({ isLoading: false })
 					toast.success('Successfully signed in!', toastOptions);
 				}
 			})
@@ -62,6 +63,7 @@ class Signin extends React.Component {
 		const { onRouteChange } = this.props;
 		return (
 			<article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
+				{this.state.isLoading ? <Spinner /> : null}
 				<ToastContainer />
 				<main className="pa4 black-80">
 					<div className="measure">
