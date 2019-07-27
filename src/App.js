@@ -8,7 +8,9 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import './App.css';
-import { ToastContainer } from "react-toastr";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import toastOptions from './utils/utils';
 
 const particlesOptions = {
   particles: {
@@ -23,7 +25,6 @@ const particlesOptions = {
 }
 
 const initialState = {
-  toastr: null,
   input: '',
   imageUrl: '',
   boxes: [],
@@ -80,7 +81,25 @@ class App extends Component {
   }
 
   onButtonSubmit = () => {
-    this.setState({ imageUrl: this.state.input });
+    const regexUrl = /^https:/g.test(this.state.input);
+    if (!regexUrl) {
+      return toast.error('Url must start with https://.. !', toastOptions);
+    } else {
+      this.setState({ imageUrl: this.state.input });
+      this.detectImage();
+    }
+  }
+
+  onRouteChange = (route) => {
+    if (route === 'signout') {
+      this.setState(initialState)
+    } else if (route === 'home') {
+      this.setState({ isSignedIn: true })
+    }
+    this.setState({ route: route });
+  }
+
+  detectImage = () => {
     fetch('https://guarded-reaches-10517.herokuapp.com/imageurl', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
@@ -109,17 +128,7 @@ class App extends Component {
       .catch(err => console.log(err));
   }
 
-  onRouteChange = (route) => {
-    if (route === 'signout') {
-      this.setState(initialState)
-    } else if (route === 'home') {
-      this.setState({ isSignedIn: true })
-    }
-    this.setState({ route: route });
-  }
-
   render() {
-    console.log(this.state)
     const { isSignedIn, imageUrl, route, boxes } = this.state;
     return (
       <div className="App">
@@ -129,6 +138,7 @@ class App extends Component {
         <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
         {route === 'home' ?
           <div>
+            <ToastContainer />
             <Logo />
             <Rank name={this.state.user.name} entries={this.state.user.entries} />
             <ImageLinkForm
@@ -138,20 +148,9 @@ class App extends Component {
             <FaceRecognition boxes={boxes} imageUrl={imageUrl} />
           </div>
           : (
-            <div>
-              <ToastContainer ref={ref => {
-                if (this.state.toastr === null) {
-                  this.setState({
-                    toastr: ref
-                  });
-                }
-              }}
-              />
-              {route === 'signin'
-                ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} toastr={this.state.toastr} />
-                : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} toastr={this.state.toastr} />
-              }
-            </div>
+            route === 'signin'
+              ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+              : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} store={this.state.toastStore} />
           )
         }
       </div>

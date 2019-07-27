@@ -1,4 +1,7 @@
 import React from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import toastOptions from '../../utils/utils';
 
 class Signin extends React.Component {
 	constructor(props) {
@@ -21,7 +24,7 @@ class Signin extends React.Component {
 		const { signInEmail, signInPassword } = this.state;
 		let validEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(signInEmail)
 		if (!validEmail || !signInPassword) {
-			return this.props.toastr.error(<div className="toastr toastr-err">{`Wrong credentials!`}</div>)
+			return toast.error('Wrong credentials!', toastOptions);
 		} else {
 			this.signInUser();
 		}
@@ -49,6 +52,7 @@ class Signin extends React.Component {
 		const { onRouteChange } = this.props;
 		return (
 			<article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
+				<ToastContainer />
 				<main className="pa4 black-80">
 					<div className="measure">
 						<fieldset id="sign_up" className="ba b--transparent ph0 mh0">

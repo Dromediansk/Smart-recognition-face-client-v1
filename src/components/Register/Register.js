@@ -1,4 +1,7 @@
 import React from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import toastOptions from '../../utils/utils';
 
 class Register extends React.Component {
 	constructor(props) {
@@ -26,9 +29,9 @@ class Register extends React.Component {
 		const { name, email, password } = this.state;
 		let validEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)
 		if (!name || !email || !validEmail) {
-			return this.props.toastr.info(<div className="toastr toastr-err">{`Wrong credentials!`}</div>)
+			return toast.error('Wrong credentials!', toastOptions);
 		} else if (password.length < 6) {
-			return this.props.toastr.error(<div className="toastr toastr-err">{`Password must have at least 6 characters!`}</div>)
+			return toast.error('Password must have at least 6 characters!', toastOptions);
 		} else {
 			this.registerUser();
 		}
@@ -56,9 +59,9 @@ class Register extends React.Component {
 	}
 
 	render() {
-		console.log(this.props)
 		return (
 			<article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
+				<ToastContainer />
 				<main className="pa4 black-80">
 					<div className="measure">
 						<fieldset id="sign_up" className="ba b--transparent ph0 mh0">
@@ -99,7 +102,7 @@ class Register extends React.Component {
 						</div>
 					</div>
 				</main>
-			</article>
+			</article >
 		);
 	}
 }
