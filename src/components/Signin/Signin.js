@@ -23,8 +23,10 @@ class Signin extends React.Component {
 	onSubmitSignIn = () => {
 		const { signInEmail, signInPassword } = this.state;
 		let validEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(signInEmail)
-		if (!validEmail || !signInPassword) {
-			return toast.error('Wrong credentials!', toastOptions);
+		if (!validEmail) {
+			return toast.error('Wrong format of email!', toastOptions);
+		} else if (!signInPassword) {
+			return toast.error('Password cannot be empty!', toastOptions);
 		} else {
 			this.signInUser();
 		}
@@ -39,11 +41,19 @@ class Signin extends React.Component {
 				password: this.state.signInPassword
 			})
 		})
-			.then(response => response.json())
+			.then(response => {
+				if (response.status === 401) {
+					return toast.error('Invalid username or password!', toastOptions);
+				} else if (response.status === 400) {
+					return toast.error('Error occured when trying to sign in!', toastOptions);
+				}
+				return response.json()
+			})
 			.then(user => {
 				if (user.id) {
 					this.props.loadUser(user)
 					this.props.onRouteChange('home');
+					toast.success('Successfully signed in!', toastOptions);
 				}
 			})
 	}
