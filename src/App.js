@@ -8,6 +8,7 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import './App.css';
+import { ToastContainer } from "react-toastr";
 
 const particlesOptions = {
   particles: {
@@ -22,6 +23,7 @@ const particlesOptions = {
 }
 
 const initialState = {
+  toastr: null,
   input: '',
   imageUrl: '',
   boxes: [],
@@ -117,6 +119,7 @@ class App extends Component {
   }
 
   render() {
+    console.log(this.state)
     const { isSignedIn, imageUrl, route, boxes } = this.state;
     return (
       <div className="App">
@@ -135,9 +138,20 @@ class App extends Component {
             <FaceRecognition boxes={boxes} imageUrl={imageUrl} />
           </div>
           : (
-            route === 'signin'
-              ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
-              : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+            <div>
+              <ToastContainer ref={ref => {
+                if (this.state.toastr === null) {
+                  this.setState({
+                    toastr: ref
+                  });
+                }
+              }}
+              />
+              {route === 'signin'
+                ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} toastr={this.state.toastr} />
+                : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} toastr={this.state.toastr} />
+              }
+            </div>
           )
         }
       </div>

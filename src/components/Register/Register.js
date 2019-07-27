@@ -22,7 +22,19 @@ class Register extends React.Component {
 		this.setState({ password: event.target.value })
 	}
 
-	onSubmitSignIn = () => {
+	onSubmitRegister = () => {
+		const { name, email, password } = this.state;
+		let validEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)
+		if (!name || !email || !validEmail) {
+			return this.props.toastr.info(<div className="toastr toastr-err">{`Wrong credentials!`}</div>)
+		} else if (password.length < 6) {
+			return this.props.toastr.error(<div className="toastr toastr-err">{`Password must have at least 6 characters!`}</div>)
+		} else {
+			this.registerUser();
+		}
+	}
+
+	registerUser = () => {
 		fetch('https://guarded-reaches-10517.herokuapp.com/register', {
 			method: 'post',
 			headers: {
@@ -44,6 +56,7 @@ class Register extends React.Component {
 	}
 
 	render() {
+		console.log(this.props)
 		return (
 			<article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
 				<main className="pa4 black-80">
@@ -80,7 +93,7 @@ class Register extends React.Component {
 						</fieldset>
 						<div className="">
 							<input
-								onClick={this.onSubmitSignIn}
+								onClick={this.onSubmitRegister}
 								className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Register"
 							/>
 						</div>

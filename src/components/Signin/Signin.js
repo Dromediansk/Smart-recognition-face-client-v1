@@ -18,6 +18,16 @@ class Signin extends React.Component {
 	}
 
 	onSubmitSignIn = () => {
+		const { signInEmail, signInPassword } = this.state;
+		let validEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(signInEmail)
+		if (!validEmail || !signInPassword) {
+			return this.props.toastr.error(<div className="toastr toastr-err">{`Wrong credentials!`}</div>)
+		} else {
+			this.signInUser();
+		}
+	}
+
+	signInUser = () => {
 		fetch('https://guarded-reaches-10517.herokuapp.com/signin', {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
