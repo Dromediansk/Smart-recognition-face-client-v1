@@ -42,10 +42,7 @@ const initialState = {
 }
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = initialState;
-  }
+  state = initialState;
 
   loadUser = (data) => {
     this.setState({
@@ -60,7 +57,12 @@ class App extends Component {
   }
 
   calculateFaceLocations = (data) => {
-    return data.outputs[0].data.regions.map(face => {
+    const faceLocation = data.outputs[0].data.regions;
+    if (!faceLocation) {
+      this.setState({ isLoading: false })
+      toast.warning('No human face found', { toastOptions })
+    }
+    return faceLocation.map(face => {
       const clarifaiFace = face.region_info.bounding_box;
       const image = document.getElementById('inputimage');
       const width = Number(image.width);
@@ -76,6 +78,7 @@ class App extends Component {
 
   displayFaceBoxes = (boxes) => {
     this.setState({ boxes: boxes });
+    toast.success('Human face successfully found!', { toastOptions })
   }
 
   onInputChange = (event) => {
@@ -83,9 +86,9 @@ class App extends Component {
   }
 
   onButtonSubmit = () => {
-    const regexUrl = /^https:/g.test(this.state.input);
+    const regexUrl = /^[http]+[s]?:/g.test(this.state.input);
     if (!regexUrl) {
-      return toast.error('Url must start with https://.. !', toastOptions);
+      return toast.error('Input must start with https:// or http:// !', toastOptions);
     } else {
       this.setState({ imageUrl: this.state.input, isLoading: true });
       this.detectImage();
@@ -102,23 +105,29 @@ class App extends Component {
   }
 
   detectImage = () => {
-    fetch('https://guarded-reaches-10517.herokuapp.com/imageurl', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: this.state.input
+    fetch(`${process.env.NODE_ENV === 'development' ?
+      'http://localhost:3000/' :
+      'https://guarded-reaches-10517.herokuapp.com/imageurl'
+      }`, {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input: this.state.input
+        })
       })
-    })
       .then(response => response.json())
       .then(response => {
         if (response) {
-          fetch('https://guarded-reaches-10517.herokuapp.com/image', {
-            method: 'put',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: this.state.user.id
+          fetch(`${process.env.NODE_ENV === 'development' ?
+            'http://localhost:3000/' :
+            'https://guarded-reaches-10517.herokuapp.com/image'
+            }`, {
+              method: 'put',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: this.state.user.id
+              })
             })
-          })
             .then(response => response.json())
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count }))
@@ -133,6 +142,7 @@ class App extends Component {
 
   render() {
     const { isSignedIn, imageUrl, route, boxes } = this.state;
+    console.log(process.env.NODE_ENV)
     return (
       <div className="App">
         <Particles className='particles'

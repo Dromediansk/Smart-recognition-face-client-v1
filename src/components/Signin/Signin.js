@@ -11,6 +11,10 @@ class Signin extends React.Component {
 		isLoading: false
 	}
 
+	componentWillUnmount = () => {
+		this.setState({ isLoading: false })
+	}
+
 	onEmailChange = (event) => {
 		this.setState({ signInEmail: event.target.value })
 	}
@@ -33,18 +37,23 @@ class Signin extends React.Component {
 
 	signInUser = () => {
 		this.setState({ isLoading: true })
-		fetch('https://guarded-reaches-10517.herokuapp.com/signin', {
-			method: 'post',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				email: this.state.signInEmail,
-				password: this.state.signInPassword
+		fetch(`${process.env.NODE_ENV === 'development' ?
+			'http://localhost:3000/' :
+			'https://guarded-reaches-10517.herokuapp.com/signin'
+			}`, {
+				method: 'post',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: this.state.signInEmail,
+					password: this.state.signInPassword
+				})
 			})
-		})
 			.then(response => {
 				if (response.status === 401) {
+					this.setState({ isLoading: false })
 					return toast.error('Invalid username or password!', toastOptions);
 				} else if (response.status === 400) {
+					this.setState({ isLoading: false })
 					return toast.error('Error occured when trying to sign in!', toastOptions);
 				}
 				return response.json()
@@ -53,7 +62,6 @@ class Signin extends React.Component {
 				if (user.id) {
 					this.props.loadUser(user)
 					this.props.onRouteChange('home');
-					this.setState({ isLoading: false })
 					toast.success('Successfully signed in!', toastOptions);
 				}
 			})

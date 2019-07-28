@@ -12,6 +12,10 @@ class Register extends React.Component {
 		isLoading: false
 	}
 
+	componentWillUnmount = () => {
+		this.setState({ isLoading: false })
+	}
+
 	onNameChange = (event) => {
 		this.setState({ name: event.target.value })
 	}
@@ -41,19 +45,23 @@ class Register extends React.Component {
 
 	registerUser = () => {
 		this.setState({ isLoading: true })
-		fetch('https://guarded-reaches-10517.herokuapp.com/register', {
-			method: 'post',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				email: this.state.email,
-				password: this.state.password,
-				name: this.state.name
+		fetch(`${process.env.NODE_ENV === 'development' ?
+			'http://localhost:3000/' :
+			'https://guarded-reaches-10517.herokuapp.com/register'
+			}`, {
+				method: 'post',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					email: this.state.email,
+					password: this.state.password,
+					name: this.state.name
+				})
 			})
-		})
 			.then(response => {
 				if (response.status === 400) {
+					this.setState({ isLoading: false })
 					return toast.error('Unable to register!', toastOptions);
 				}
 				return response.json()
@@ -62,7 +70,6 @@ class Register extends React.Component {
 				if (user.id) {
 					this.props.loadUser(user)
 					this.props.onRouteChange('home');
-					this.setState({ isLoading: false })
 					toast.success('Successfully registered!', toastOptions);
 				}
 			})
