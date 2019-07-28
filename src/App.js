@@ -10,7 +10,7 @@ import Rank from './components/Rank/Rank';
 import './App.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import toastOptions from './utils/utils';
+import { toastOptions, envEndpoint } from './utils/utils';
 import Spinner from './utils/Spinner/Spinner';
 
 const particlesOptions = {
@@ -105,44 +105,46 @@ class App extends Component {
   }
 
   detectImage = () => {
-    fetch(`${process.env.NODE_ENV === 'development' ?
-      'http://localhost:3000/' :
-      'https://guarded-reaches-10517.herokuapp.com/imageurl'
-      }`, {
-        method: 'post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: this.state.input
-        })
+    let url;
+    fetch(`${envEndpoint(url)}imageurl`, {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: this.state.input
       })
+    })
       .then(response => response.json())
       .then(response => {
         if (response) {
-          fetch(`${process.env.NODE_ENV === 'development' ?
-            'http://localhost:3000/' :
-            'https://guarded-reaches-10517.herokuapp.com/image'
-            }`, {
-              method: 'put',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                id: this.state.user.id
-              })
+          fetch(`${envEndpoint(url)}image`, {
+            method: 'put',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: this.state.user.id
             })
+          })
             .then(response => response.json())
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count }))
             })
-            .catch(console.log)
+            .catch(err => {
+              console.log(err);
+              this.setState({ isLoading: false })
+              return toast.error('Unable to process counts!', toastOptions);
+            });
         }
         this.displayFaceBoxes(this.calculateFaceLocations(response))
         this.setState({ isLoading: false })
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        this.setState({ isLoading: false })
+        return toast.error('No image found on this url!', toastOptions);
+      });
   }
 
   render() {
     const { isSignedIn, imageUrl, route, boxes } = this.state;
-    console.log(process.env.NODE_ENV)
     return (
       <div className="App">
         <Particles className='particles'

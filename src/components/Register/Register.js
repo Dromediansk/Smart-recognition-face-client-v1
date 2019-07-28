@@ -1,8 +1,8 @@
 import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import toastOptions from '../../utils/utils';
 import Spinner from '../../utils/Spinner/Spinner';
+import { toastOptions, envEndpoint } from '../../utils/utils';
 
 class Register extends React.Component {
 	state = {
@@ -44,21 +44,19 @@ class Register extends React.Component {
 	}
 
 	registerUser = () => {
+		let url;
 		this.setState({ isLoading: true })
-		fetch(`${process.env.NODE_ENV === 'development' ?
-			'http://localhost:3000/' :
-			'https://guarded-reaches-10517.herokuapp.com/register'
-			}`, {
-				method: 'post',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					email: this.state.email,
-					password: this.state.password,
-					name: this.state.name
-				})
+		fetch(`${envEndpoint(url)}register`, {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				email: this.state.email,
+				password: this.state.password,
+				name: this.state.name
 			})
+		})
 			.then(response => {
 				if (response.status === 400) {
 					this.setState({ isLoading: false })

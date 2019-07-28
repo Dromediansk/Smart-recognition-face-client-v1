@@ -1,7 +1,7 @@
 import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import toastOptions from '../../utils/utils';
+import { toastOptions, envEndpoint } from '../../utils/utils';
 import Spinner from '../../utils/Spinner/Spinner';
 
 class Signin extends React.Component {
@@ -36,25 +36,23 @@ class Signin extends React.Component {
 	}
 
 	signInUser = () => {
+		let url;
 		this.setState({ isLoading: true })
-		fetch(`${process.env.NODE_ENV === 'development' ?
-			'http://localhost:3000/' :
-			'https://guarded-reaches-10517.herokuapp.com/signin'
-			}`, {
-				method: 'post',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					email: this.state.signInEmail,
-					password: this.state.signInPassword
-				})
+		fetch(`${envEndpoint(url)}signin`, {
+			method: 'post',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				email: this.state.signInEmail,
+				password: this.state.signInPassword
 			})
+		})
 			.then(response => {
 				if (response.status === 401) {
 					this.setState({ isLoading: false })
 					return toast.error('Invalid username or password!', toastOptions);
-				} else if (response.status === 400) {
+				} else if (response.status === 400 || response.status === 404) {
 					this.setState({ isLoading: false })
-					return toast.error('Error occured when trying to sign in!', toastOptions);
+					return toast.error('Error when trying to sign in!', toastOptions);
 				}
 				return response.json()
 			})

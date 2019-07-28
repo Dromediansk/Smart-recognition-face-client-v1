@@ -1,4 +1,4 @@
-const toastOptions = {
+export const toastOptions = {
     position: "top-right",
     autoClose: 3000,
     hideProgressBar: false,
@@ -7,4 +7,9 @@ const toastOptions = {
     draggable: true
 }
 
-export default toastOptions;
+export const envEndpoint = (url) => {
+    if (process.env.NODE_ENV === 'development') {
+        return url = 'http://localhost:3000/'
+    }
+    return url = 'https://guarded-reaches-10517.herokuapp.com/'
+}
